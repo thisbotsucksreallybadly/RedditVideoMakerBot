@@ -66,9 +66,13 @@ class TTSEngine:
                     self.split_post(self.reddit_object["thread_post"], "postaudio")
                 else :
                     self.call_tts("postaudio",process_text(self.reddit_object["thread_post"]) )   
-            elif settings.config["settings"]["storymodemethod"] == 1:
-                
+            elif settings.config["settings"]["storymodemethod"] == 1:           
                 for idx,text in  track(enumerate(self.reddit_object["thread_post"])):
+                    if self.length > self.max_length and idx > 1:
+                        self.length -= self.last_clip_length
+                        idx -= 1
+                        break
+                    # # else:
                     self.call_tts(f"postaudio-{idx}",process_text(text) )
 
         else :
