@@ -1,4 +1,5 @@
 import re
+from TTS.engine_wrapper import process_text
 import textwrap
 
 from PIL import Image, ImageDraw, ImageFont
@@ -29,8 +30,12 @@ def imagemaker( theme,
     '''
     Render Images for video 
     '''
-    title=reddit_obj['thread_title']
-    texts=reddit_obj['thread_post']
+    title=process_text(reddit_obj['thread_title'], False)
+    
+    texts = [process_text(s,False) for s in reddit_obj['thread_post']]
+
+    
+    
     id = re.sub(r"[^\w\s-]", "", reddit_obj["thread_id"])
 
     tfont=ImageFont.truetype("fonts\\Roboto-Bold.ttf",27) # for title
@@ -46,7 +51,7 @@ def imagemaker( theme,
     else:
         
         Fontperm= tfont.getsize(title)
-        draw.text(((image.size[0]-Fontperm[0])/2,(image.size[1]-Fontperm[1])/2),font=tfont,text=title) #(image.size[1]/2)-(Fontperm[1]/2)
+        draw.text(((image.size[0]-Fontperm[0])/2,(image.size[1]-Fontperm[1])/2),font=tfont,text=title ,stroke_width= 2  ) #(image.size[1]/2)-(Fontperm[1]/2)
     
     image.save(f'assets/temp/{id}/png/title.png')    
 

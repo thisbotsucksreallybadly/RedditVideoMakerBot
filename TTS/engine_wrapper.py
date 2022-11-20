@@ -18,7 +18,7 @@ from utils import settings
 from utils.console import print_step, print_substep
 from utils.voice import sanitize_text
 
-DEFAULT_MAX_LENGTH: int = 50 # video length variable
+DEFAULT_MAX_LENGTH: int = 50 # video length variable  now be set in toml TODO
 
 class TTSEngine:
 
@@ -47,7 +47,7 @@ class TTSEngine:
 
         self.redditid = re.sub(r"[^\w\s-]", "", reddit_object["thread_id"])
         self.path = path + self.redditid + "/mp3"
-        self.max_length = max_length
+        self.max_length = max_length if 'len' not in settings.config['settings'] else settings.config['settings']['len']
         self.length = 0
         self.last_clip_length = last_clip_length
 
@@ -162,9 +162,9 @@ class TTSEngine:
         silence.write_audiofile(f"{self.path}/silence.mp3", fps=44100, verbose=False, logger=None)
 
 
-def process_text(text: str):
+def process_text(text: str , sanitize : bool = True):
     lang = settings.config["reddit"]["thread"]["post_lang"]
-    new_text = sanitize_text(text)
+    new_text = sanitize_text(text) if sanitize else text
     if lang:
         print_substep("Translating Text...")
         translated_text = ts.google(text, to_language=lang)
