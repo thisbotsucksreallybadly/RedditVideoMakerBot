@@ -81,6 +81,7 @@ def make_final_video(
         if settings.config["settings"]["storymodemethod"] == 0:
             audio_clips = [AudioFileClip(f"assets/temp/{id}/mp3/title.mp3")]
             audio_clips.insert(1,AudioFileClip(f"assets/temp/{id}/mp3/postaudio.mp3"))
+
         elif settings.config["settings"]["storymodemethod"] == 1:
             audio_clips = [AudioFileClip(f"assets/temp/{id}/mp3/postaudio-{i}.mp3") \
                     for i in track(range(number_of_clips + 1), "Collecting the audio files...")]

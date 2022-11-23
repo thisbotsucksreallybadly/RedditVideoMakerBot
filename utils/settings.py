@@ -5,7 +5,7 @@ from pathlib import Path
 import toml
 from rich.console import Console
 
-from utils.console import handle_input
+
 
 console = Console()
 config = dict  # autocomplete
@@ -159,5 +159,9 @@ If you see any prompts, that means that you have unset/incorrectly set variables
 
 
 if __name__ == "__main__":
+    from console import handle_input
     directory = Path().absolute()
     check_toml(f"{directory}/utils/.config.template.toml", "config.toml")
+    # print(type(config['settings']['len']))
+else:
+     from utils.console import handle_input

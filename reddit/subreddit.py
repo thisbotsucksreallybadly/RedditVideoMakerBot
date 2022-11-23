@@ -66,15 +66,17 @@ def get_subreddit_threads(POST_ID: str):
         if str(subreddit_choice).casefold().startswith("r/"):  # removes the r/ from the input
             subreddit_choice = subreddit_choice[2:]
         subreddit = reddit.subreddit(subreddit_choice)
-
+    # posturl = settings.config["reddit"]["thread"]["post_url"]
     if POST_ID:  # would only be called if there are multiple queued posts
         submission = reddit.submission(id=POST_ID)
-        
-    elif (
-        settings.config["reddit"]["thread"]["post_id"]
-        and len(str(settings.config["reddit"]["thread"]["post_id"]).split("+")) == 1
-    ):
-        submission = reddit.submission(id=settings.config["reddit"]["thread"]["post_id"])
+    # elif posturl :
+    #     submission = reddit.submission(url=posturl)
+    # don't need this line already done in main.py    
+    # elif (
+    #     settings.config["reddit"]["thread"]["post_id"] 
+    #     and len(str(settings.config["reddit"]["thread"]["post_id"]).split("+")) == 1
+    # ):
+    #     submission = reddit.submission(id=settings.config["reddit"]["thread"]["post_id"])
     else:
         threads = subreddit.hot(limit=25)
         submission = get_subreddit_undone(threads, subreddit)

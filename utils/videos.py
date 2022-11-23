@@ -22,7 +22,7 @@ def check_done(
     with open("./video_creation/data/videos.json", "r", encoding="utf-8") as done_vids_raw:
         done_videos = json.load(done_vids_raw)
     for video in done_videos:
-        if video["id"] == str(redditobj):
+        if video["id"] == str(redditobj) :# or video["id"] == :
             if settings.config["reddit"]["thread"]["post_id"]:
                 print_step(
                     "You already have done this video but since it was declared specifically in the config file the program will continue"
