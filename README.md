@@ -32,7 +32,7 @@ The only original thing being done is the editing and gathering of all materials
 
 ## Requirements
 
-- Python 3.9+
+- Python 3.10
 - Playwright (this should install automatically in installation)
 
 ## Installation 👩‍💻
@@ -70,6 +70,7 @@ In its current state, this bot does exactly what it needs to do. However, improv
 I have tried to simplify the code so anyone can read it and start contributing at any skill level. Don't be shy :) contribute!
 
 - [ ] Creating better documentation and adding a command line interface.
+- [ ] Allowing the user to choose background music for their videos.
 - [x] Allowing users to choose a reddit thread instead of being randomized.
 - [x] Allowing users to choose a background that is picked instead of the Minecraft one.
 - [x] Allowing users to choose between any subreddit.
@@ -78,7 +79,7 @@ I have tried to simplify the code so anyone can read it and start contributing a
 - [x] Light and Dark modes
 - [x] NSFW post filter
 
-Please read our [contributing guidelines](CONTRIBUTING.md) for more detailed information.
+Please read our [contributing guidelines](CONTRIBUTING.md) for more detailed information
 
 ### For any questions or support join the [Discord](https://discord.com/channels/897666935708352582/) server
 ## Developers and maintainers.
@@ -87,9 +88,11 @@ Elebumm (Lewis#6305) - https://github.com/elebumm (Founder)
 
 Jason (JasonLovesDoggo#1904) - https://github.com/JasonLovesDoggo (Maintainer)
 
+Simon (OpenSourceSimon) - https://github.com/OpenSourceSimon
+
 CallumIO (c.#6837) - https://github.com/CallumIO
 
-Verq (Verq#2338) - https://github.com/CordlessCoder 
+Verq (Verq#2338) - https://github.com/CordlessCoder
 
 LukaHietala (Pix.#0001) - https://github.com/LukaHietala
 
