@@ -73,7 +73,7 @@ def make_final_video(
         VideoFileClip(f"assets/temp/{id}/background.mp4")
         .without_audio()
         .resize(height=H)
-        .crop(x1=1166.6, y1=0, x2=2246.6, y2=1920)
+        # .crop(x1=1166.6, y1=0, x2=2246.6, y2=1920)
     )
 
     # Gather all audio clips
@@ -133,7 +133,7 @@ def make_final_video(
                 image_clips.append(
                     ImageClip(f"assets/temp/{id}/png/img{i}.png")
                     .set_duration(audio_clips[i + 1].duration)
-                    .resize(width=W - 100)
+                    .resize(width=W - 200)
                     .set_opacity(new_opacity)
                     # .crossfadein(new_transition)
                     # .crossfadeout(new_transition)
@@ -143,7 +143,7 @@ def make_final_video(
             image_clips.append(
                 ImageClip(f"assets/temp/{id}/png/comment_{i}.png")
                 .set_duration(audio_clips[i + 1].duration)
-                .resize(width=W - 100)
+                   # .resize(2)#abs(W - settings.config["settings"]["xymargin"] / 152) )     #size+marigin/current_width 
                 .set_opacity(new_opacity)
                 .crossfadein(new_transition)
                 .crossfadeout(new_transition)
@@ -173,9 +173,9 @@ def make_final_video(
     #    #    VOLUME_MULTIPLIER)  # lower volume by background_audio_volume, use with fx
     #    final.set_audio(final_audio)
     # if 
-    final = Video(final).add_watermark(
-        text=f"Background credit: {background_config[2]}", opacity=0.4, redditid=reddit_obj
-    )
+    # final = Video(final).add_watermark(
+    #     text=f"Background credit: {background_config[2]}", opacity=0.4, redditid=reddit_obj
+    # )
     
 
    

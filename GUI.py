@@ -40,6 +40,10 @@ def after_request(response):
 def index():
     return render_template("index.html", file="videos.json")
 
+@app.route("/home")
+def home():
+    pass
+
 
 @app.route("/backgrounds", methods=["GET"])
 def backgrounds():
