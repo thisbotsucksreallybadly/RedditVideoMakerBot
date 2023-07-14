@@ -244,3 +244,7 @@ video_creation/data/envvars.txt
 
 config.toml
 video_creation/data/videos.json
+*.exe
+.gitignore
+.vscode
+test*
