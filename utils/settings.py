@@ -1,5 +1,5 @@
 import re
-from typing import Any, Literal, 
+from typing import Any, Literal
 from pathlib import Path
 import toml
 from rich.console import Console
