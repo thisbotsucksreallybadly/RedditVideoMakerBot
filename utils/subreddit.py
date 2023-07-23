@@ -1,14 +1,17 @@
 import json
 from os.path import exists
+import sys
+from typing import Iterable
 
+from praw.models import Submission
 from utils import settings
 from utils.console import print_substep
 from utils.ai_methods import sort_by_similarity
 
 
 def get_subreddit_undone(
-    submissions: list, subreddit, times_checked=0, similarity_scores=None
-):
+    submissions: Iterable[Submission], subreddit, times_checked=0, similarity_scores=None
+)-> Submission:
     """_summary_
 
     Args:
@@ -23,7 +26,7 @@ def get_subreddit_undone(
         print(
             "Sorting based on similarity for a different date filter and thread limit.."
         )
-        submissions = sort_by_similarity(
+        submissions,_ = sort_by_similarity(
             submissions, keywords=settings.config["ai"]["ai_similarity_enabled"]
         )
 
@@ -77,7 +80,7 @@ def get_subreddit_undone(
         if settings.config["settings"]["storymode"] and not submission.is_self:
             continue
         if similarity_scores is not None:
-            return submission, similarity_scores[i].item()
+            return submission
         return submission
     print("all submissions have been done going by top submission order")
     VALID_TIME_FILTERS = [
@@ -90,7 +93,8 @@ def get_subreddit_undone(
     ]  # set doesn't have __getitem__
     index = times_checked + 1
     if index == len(VALID_TIME_FILTERS):
-        print("All submissions have been done.")
+        print_substep("All submissions have been done.","red")
+        sys.exit(1)
 
     return get_subreddit_undone(
         subreddit.top(

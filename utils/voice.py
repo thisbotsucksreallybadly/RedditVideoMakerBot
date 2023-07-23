@@ -1,16 +1,13 @@
 import re
 import sys
 import time as pytime
-from datetime import datetime
+from datetime import datetime, timezone
 from time import sleep
 
+from cleantext import clean
 from requests import Response
 
 from utils import settings
-from cleantext import clean
-
-if sys.version_info[0] >= 3:
-    from datetime import timezone
 
 
 def check_ratelimit(response: Response) -> bool:
@@ -88,7 +85,7 @@ def sanitize_text(text: str) -> str:
     # note: not removing apostrophes
     regex_expr = r"\s['|’]|['|’]\s|[\^_~@!&;#:\-%—“”‘\"%\*/{}\[\]\(\)\\|<>=+]"
     result = re.sub(regex_expr, " ", result)
-    result = result.replace("+", "plus").replace("&", "and")
+    result = result.replace("+", "plus").replace("&", "and").replace("fuck","duck").replace("dick","pepe").replace("nigger","n word")
 
     # emoji removal if the setting is enabled
     if settings.config["settings"]["tts"]["no_emojis"]:

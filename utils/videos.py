@@ -31,7 +31,7 @@ def check_done(
                 )
                 return redditobj
             print_step("Getting new post as the current one has already been done")
-            return None
+            raise ValueError("idk but error happended in while searching for old data. :/")
     return redditobj
 
 

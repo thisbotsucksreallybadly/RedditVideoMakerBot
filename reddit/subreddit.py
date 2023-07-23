@@ -1,10 +1,11 @@
 import re
+from typing import Any, Dict, Union
 
 from prawcore.exceptions import ResponseException
 
 from utils import settings
 import praw
-from praw.models import MoreComments
+from praw.models import MoreComments, Submission
 from prawcore.exceptions import ResponseException
 
 from utils.console import print_step, print_substep
@@ -15,7 +16,7 @@ from utils.posttextparser import posttextparser
 from utils.ai_methods import sort_by_similarity
 
 
-def get_subreddit_threads(POST_ID: str):
+def get_subreddit_threads(POST_ID: Union[str, None]) -> Dict[str, Any]:
     """
     Returns a list of threads from the AskReddit subreddit.
     """
@@ -48,9 +49,7 @@ def get_subreddit_threads(POST_ID: str):
     except ResponseException as e:
         if e.response.status_code == 401:
             print("Invalid credentials - please check them in config.toml")
-    except:
-        print("Something went wrong...")
-
+        raise e
     # Ask user for subreddit input
     print_step("Getting subreddit threads...")
     similarity_score = 0
@@ -87,19 +86,19 @@ def get_subreddit_threads(POST_ID: str):
         submission = reddit.submission(
             id=settings.config["reddit"]["thread"]["post_id"]
         )
-    elif settings.config["ai"][
-        "ai_similarity_enabled"
-    ]:  # ai sorting based on comparison
-        threads = subreddit.hot(limit=50)
-        keywords = settings.config["ai"]["ai_similarity_keywords"].split(",")
-        keywords = [keyword.strip() for keyword in keywords]
-        # Reformat the keywords for printing
-        keywords_print = ", ".join(keywords)
-        print(f"Sorting threads by similarity to the given keywords: {keywords_print}")
-        threads, similarity_scores = sort_by_similarity(threads, keywords)
-        submission, similarity_score = get_subreddit_undone(
-            threads, subreddit, similarity_scores=similarity_scores
-        )
+    # elif settings.config["ai"][ #Not using this feature
+    #     "ai_similarity_enabled"
+    # ]:  # ai sorting based on comparison
+    #     threads = subreddit.hot(limit=50)
+    #     keywords = settings.config["ai"]["ai_similarity_keywords"].split(",")
+    #     keywords = [keyword.strip() for keyword in keywords]
+    #     # Reformat the keywords for printing
+    #     keywords_print = ", ".join(keywords)
+    #     print(f"Sorting threads by similarity to the given keywords: {keywords_print}")
+    #     threads = sort_by_similarity(threads, keywords)
+    #     submission, similarity_score = get_subreddit_undone(
+    #         threads, subreddit, similarity_scores=similarity_scores
+    #     )
     else:
         threads = subreddit.hot(limit=25)
         submission = get_subreddit_undone(threads, subreddit)
@@ -170,6 +169,7 @@ def get_subreddit_threads(POST_ID: str):
                                     "comment_id": top_level_comment.id,
                                 }
                             )
-
+        if len(content["comments"]) < 1:
+            raise ValueError("post not have any comment to read")
     print_substep("Received subreddit threads Successfully.", style="bold green")
     return content

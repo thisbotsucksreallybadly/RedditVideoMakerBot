@@ -15,10 +15,10 @@ from utils.playwright import clear_cookie_by_name
 
 from utils.videos import save_data
 
-__all__ = ["download_screenshots_of_reddit_posts"]
+__all__ = ["get_screenshots_of_reddit_posts"]
 
 
-def get_screenshots_of_reddit_posts(reddit_object: dict, screenshot_num: int):
+def get_screenshots_of_reddit_posts(reddit_object: dict, screenshot_num: int) -> None:
     """Downloads screenshots of reddit posts as seen on the web. Downloads to assets/temp/png
 
     Args:
@@ -78,13 +78,13 @@ def get_screenshots_of_reddit_posts(reddit_object: dict, screenshot_num: int):
             transparent=transparent,
         )
 
-    screenshot_num: int
+
     with sync_playwright() as p:
         print_substep("Launching Headless Browser...")
 
         browser = p.chromium.launch(
-            headless=True
-        )  # headless=False will show the browser for debugging purposes
+            headless=False
+        )  # headless= will show the browser for debugging purposes
         # Device scale factor (or dsf for short) allows us to increase the resolution of the screenshots
         # When the dsf is 1, the width of the screenshot is 600 pixels
         # so we need a dsf such that the width of the screenshot is greater than the final resolution of the video
@@ -168,7 +168,7 @@ def get_screenshots_of_reddit_posts(reddit_object: dict, screenshot_num: int):
 
         if lang:
             print_substep("Translating post...")
-            texts_in_tl = translators.google(
+            texts_in_tl = translators.translate_text(
                 reddit_object["thread_title"],
                 to_language=lang,
             )

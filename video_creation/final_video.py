@@ -17,48 +17,48 @@ from utils.thumbnail import create_thumbnail
 from utils.videos import save_data
 from utils import settings
 
-import tempfile
-import threading
-import time
+# import tempfile
+# import threading
+# import time
 
 console = Console()
 
 
-class ProgressFfmpeg(threading.Thread):
-    def __init__(self, vid_duration_seconds, progress_update_callback):
-        threading.Thread.__init__(self, name="ProgressFfmpeg")
-        self.stop_event = threading.Event()
-        self.output_file = tempfile.NamedTemporaryFile(mode="w+", delete=False)
-        self.vid_duration_seconds = vid_duration_seconds
-        self.progress_update_callback = progress_update_callback
+# class ProgressFfmpeg(threading.Thread):
+#     def __init__(self, vid_duration_seconds, progress_update_callback):
+#         threading.Thread.__init__(self, name="ProgressFfmpeg")
+#         self.stop_event = threading.Event()
+#         self.output_file = tempfile.NamedTemporaryFile(mode="w+", delete=False)
+#         self.vid_duration_seconds = vid_duration_seconds
+#         self.progress_update_callback = progress_update_callback
 
-    def run(self):
-        while not self.stop_event.is_set():
-            latest_progress = self.get_latest_ms_progress()
-            if latest_progress is not None:
-                completed_percent = latest_progress / self.vid_duration_seconds
-                self.progress_update_callback(completed_percent)
-            time.sleep(1)
+#     def run(self):
+#         while not self.stop_event.is_set():
+#             latest_progress = self.get_latest_ms_progress()
+#             if latest_progress is not None:
+#                 completed_percent = latest_progress / self.vid_duration_seconds
+#                 self.progress_update_callback(completed_percent)
+#             time.sleep(1)
 
-    def get_latest_ms_progress(self):
-        lines = self.output_file.readlines()
+#     def get_latest_ms_progress(self):
+#         lines = self.output_file.readlines()
 
-        if lines:
-            for line in lines:
-                if "out_time_ms" in line:
-                    out_time_ms = line.split("=")[1]
-                    return int(out_time_ms) / 1000000.0
-        return None
+#         if lines:
+#             for line in lines:
+#                 if "out_time_ms" in line:
+#                     out_time_ms = line.split("=")[1]
+#                     return int(out_time_ms) / 1000000.0
+#         return None
 
-    def stop(self):
-        self.stop_event.set()
+    # def stop(self) -> None:
+    #     self.stop_event.set()
 
-    def __enter__(self):
-        self.start()
-        return self
+    # def __enter__(self):
+    #     self.start()
+    #     return self
 
-    def __exit__(self, *args, **kwargs):
-        self.stop()
+    # def __exit__(self, *args, **kwargs) -> None:
+    #     self.stop()
 
 
 def name_normalize(name: str) -> str:
@@ -72,7 +72,8 @@ def name_normalize(name: str) -> str:
     lang = settings.config["reddit"]["thread"]["post_lang"]
     if lang:
         print_substep("Translating filename...")
-        translated_name = translators.google(name, to_language=lang)
+        translated_name = translators.translate_text(name, to_language=lang)
+        assert isinstance(translated_name,str)
         return translated_name
     else:
         return name
@@ -80,6 +81,7 @@ def name_normalize(name: str) -> str:
 
 def prepare_background(reddit_id: str, W: int, H: int) -> str:
     output_path = f"assets/temp/{reddit_id}/background_noaudio.mp4"
+    
     output = (
         ffmpeg.input(f"assets/temp/{reddit_id}/background.mp4")
         .filter("crop", f"ih*({W}/{H})", "ih")
@@ -91,10 +93,14 @@ def prepare_background(reddit_id: str, W: int, H: int) -> str:
                 "b:v": "20M",
                 "b:a": "192k",
                 "threads": multiprocessing.cpu_count(),
+                "loglevel": "warning",
+                "stats": None
+                
             },
         )
         .overwrite_output()
     )
+    print("croping video")
     try:
         output.run(quiet=True)
     except ffmpeg.Error as e:
@@ -103,7 +109,7 @@ def prepare_background(reddit_id: str, W: int, H: int) -> str:
     return output_path
 
 
-def merge_background_audio(audio: ffmpeg, reddit_id: str):
+def merge_background_audio(audio: ffmpeg._ffmpeg.InputNode, reddit_id: str):
     """Gather an audio and merge with assets/backgrounds/background.mp3
     Args:
         audio (ffmpeg): The TTS final audio but without background.
@@ -248,12 +254,12 @@ def make_final_video(
                 ),
             )
             background_clip = background_clip.overlay(
-                image_clips[1],
-                enable=f"between(t,{current_time},{current_time + audio_clips_durations[1]})",
+                image_clips[0],
+                enable=f"between(t,{current_time},{current_time + audio_clips_durations[0]})",
                 x="(main_w-overlay_w)/2",
                 y="(main_h-overlay_h)/2",
             )
-            current_time += audio_clips_durations[1]
+            current_time += audio_clips_durations[0]
         elif settings.config["settings"]["storymodemethod"] == 1:
             for i in track(
                 range(0, number_of_clips + 1), "Collecting the image files..."
@@ -350,80 +356,57 @@ def make_final_video(
     background_clip = ffmpeg.drawtext(
         background_clip,
         text=text,
-        x=f"(w-text_w)",
-        y=f"(h-text_h)",
-        fontsize=5,
+        x=f"(w-text_w)", # type: ignore
+        y=f"(h-text_h)", # type: ignore
+        fontsize=7,
         fontcolor="White",
         fontfile=os.path.join("fonts", "Roboto-Regular.ttf"),
     )
     background_clip = background_clip.filter("scale", W, H)
     print_step("Rendering the video 🎥")
-    from tqdm import tqdm
-
-    pbar = tqdm(total=100, desc="Progress: ", bar_format="{l_bar}{bar}", unit=" %")
-
-    def on_update_example(progress) -> None:
-        status = round(progress * 100, 2)
-        old_percentage = pbar.n
-        pbar.update(status - old_percentage)
-
+  
+   
     defaultPath = f"results/{subreddit}"
-    with ProgressFfmpeg(length, on_update_example) as progress:
-        path = defaultPath + f"/{filename}"
-        path = (
-            path[:251] + ".mp4"
-        )  # Prevent a error by limiting the path length, do not change this.
-        ffmpeg.output(
-            background_clip,
-            final_audio,
-            path,
-            f="mp4",
-            **{
-                "c:v": "h264",
-                "b:v": "20M",
-                "b:a": "192k",
-                "threads": multiprocessing.cpu_count(),
-            },
-        ).overwrite_output().global_args("-progress", progress.output_file.name).run(
-            quiet=True,
-            overwrite_output=True,
-            capture_stdout=False,
-            capture_stderr=False,
-        )
-    old_percentage = pbar.n
-    pbar.update(100 - old_percentage)
+    # with ProgressFfmpeg(length, on_update_example) as progress:
+    path = defaultPath + f"/{filename}"
+    path = path[:251] + ".mp4"  # Prevent a error by limiting the path length, do not change this.
+    ffmpeg.output(
+        background_clip,
+        final_audio,
+        path,
+        f="mp4",
+        **{
+            "c:v": "h264",
+            "b:v": "20M",
+            "b:a": "192k",
+            "threads": multiprocessing.cpu_count(),
+
+        },
+    ).overwrite_output().run()
+
     if allowOnlyTTSFolder:
         path = defaultPath + f"/OnlyTTS/{filename}"
         path = (
             path[:251] + ".mp4"
         )  # Prevent a error by limiting the path length, do not change this.
         print_step("Rendering the Only TTS Video 🎥")
-        with ProgressFfmpeg(length, on_update_example) as progress:
-            try:
-                ffmpeg.output(
-                    background_clip,
-                    audio,
-                    path,
-                    f="mp4",
-                    **{
-                        "c:v": "h264",
-                        "b:v": "20M",
-                        "b:a": "192k",
-                        "threads": multiprocessing.cpu_count(),
-                    },
-                ).overwrite_output().global_args("-progress", progress.output_file.name).run(
-                    quiet=True,
-                    overwrite_output=True,
-                    capture_stdout=False,
-                    capture_stderr=False,
-                )
-            except ffmpeg.Error as e:
-                print(e.stderr.decode("utf8"))
-                exit(1)
 
-        old_percentage = pbar.n
-        pbar.update(100 - old_percentage)
-    pbar.close()
+
+    ffmpeg.output(
+        background_clip,
+        audio,
+        path,
+        f="mp4",
+        **{
+            "c:v": "h264",
+            "b:v": "20M",
+            "b:a": "192k",
+            "threads": multiprocessing.cpu_count(),
+            "loglevel": "warning",
+            "stats": None
+        },
+    ).overwrite_output().run()
+
     save_data(subreddit, filename + ".mp4", title, idx, background_config["video"][2])
     print_step("Removing temporary files 🗑")
     cleanups = cleanup(reddit_id)

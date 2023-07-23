@@ -1,5 +1,5 @@
 import re
-from typing import Tuple, Dict
+from typing import Any, Literal, 
 from pathlib import Path
 import toml
 from rich.console import Console
@@ -7,7 +7,7 @@ from rich.console import Console
 from utils.console import handle_input
 
 console = Console()
-config = dict  # autocomplete
+config = dict()  # autocomplete
 
 
 def crawl(obj: dict, func=lambda x, y: print(x, y, end="\n"), path=None):
@@ -124,7 +124,7 @@ def check_vars(path, checks):
     crawl_and_check(config, path, checks)
 
 
-def check_toml(template_file, config_file) -> Tuple[bool, Dict]:
+def check_toml(template_file, config_file) -> dict[str, Any] | Literal[False] | None:
     global config
     config = None
     try:
