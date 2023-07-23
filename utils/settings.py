@@ -20,8 +20,8 @@ def crawl(obj: dict, func=lambda x, y: print(x, y, end="\n"), path=None):
         func(path + [key], obj[key])
 
 
-def check(value, checks, name):
-    def get_check_value(key, default_result):
+def check(value, checks, name) -> Any:
+    def get_check_value(key, default_result) -> Any:
         return checks[key] if key in checks else default_result
 
     incorrect = False
