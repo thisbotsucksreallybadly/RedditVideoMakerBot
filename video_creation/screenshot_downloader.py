@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Dict, Final
 
 import translators
-from playwright.async_api import async_playwright  # pylint: disable=unused-import
 from playwright.sync_api import ViewportSize, sync_playwright
 from rich.progress import track
 
@@ -240,7 +239,7 @@ def get_screenshots_of_reddit_posts(reddit_object: dict, screenshot_num: int) ->
                     # translate code
 
                 if settings.config["reddit"]["thread"]["post_lang"]:
-                    comment_tl = translators.google(
+                    comment_tl = translators.translate_text(
                         comment["comment_body"],
                         to_language=settings.config["reddit"]["thread"]["post_lang"],
                     )
